@@ -1,0 +1,288 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DFD9BCBD1361F79700837C63 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFD9BCBC1361F79700837C63 /* Cocoa.framework */; };
+		DFD9BCC71361F79700837C63 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFD9BCC51361F79700837C63 /* InfoPlist.strings */; };
+		DFD9BCCA1361F79700837C63 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DFD9BCC91361F79700837C63 /* main.m */; };
+		DFD9BCCD1361F79700837C63 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DFD9BCCB1361F79700837C63 /* Credits.rtf */; };
+		DFD9BCD01361F79700837C63 /* HDEAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DFD9BCCF1361F79700837C63 /* HDEAppDelegate.m */; };
+		DFD9BCD31361F79700837C63 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DFD9BCD11361F79700837C63 /* MainMenu.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DFD9BCB81361F79700837C63 /* HDE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HDE.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DFD9BCBC1361F79700837C63 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		DFD9BCBF1361F79700837C63 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		DFD9BCC01361F79700837C63 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		DFD9BCC11361F79700837C63 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		DFD9BCC41361F79700837C63 /* HDE-Info.plist */ = {isa = PBXFileReference; path = "HDE-Info.plist"; sourceTree = "<group>"; };
+		DFD9BCC61361F79700837C63 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DFD9BCC81361F79700837C63 /* HDE-Prefix.pch */ = {isa = PBXFileReference; path = "HDE-Prefix.pch"; sourceTree = "<group>"; };
+		DFD9BCC91361F79700837C63 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		DFD9BCCC1361F79700837C63 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		DFD9BCCE1361F79700837C63 /* HDEAppDelegate.h */ = {isa = PBXFileReference; path = HDEAppDelegate.h; sourceTree = "<group>"; };
+		DFD9BCCF1361F79700837C63 /* HDEAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HDEAppDelegate.m; sourceTree = "<group>"; };
+		DFD9BCD21361F79700837C63 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DFD9BCB51361F79700837C63 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFD9BCBD1361F79700837C63 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DFD9BCAD1361F79700837C63 = {
+			isa = PBXGroup;
+			children = (
+				DFD9BCC21361F79700837C63 /* HDE */,
+				DFD9BCBB1361F79700837C63 /* Frameworks */,
+				DFD9BCB91361F79700837C63 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DFD9BCB91361F79700837C63 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DFD9BCB81361F79700837C63 /* HDE.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DFD9BCBB1361F79700837C63 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DFD9BCBC1361F79700837C63 /* Cocoa.framework */,
+				DFD9BCBE1361F79700837C63 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DFD9BCBE1361F79700837C63 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DFD9BCBF1361F79700837C63 /* AppKit.framework */,
+				DFD9BCC01361F79700837C63 /* CoreData.framework */,
+				DFD9BCC11361F79700837C63 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		DFD9BCC21361F79700837C63 /* HDE */ = {
+			isa = PBXGroup;
+			children = (
+				DFD9BCCE1361F79700837C63 /* HDEAppDelegate.h */,
+				DFD9BCCF1361F79700837C63 /* HDEAppDelegate.m */,
+				DFD9BCD11361F79700837C63 /* MainMenu.xib */,
+				DFD9BCC31361F79700837C63 /* Supporting Files */,
+			);
+			path = HDE;
+			sourceTree = "<group>";
+		};
+		DFD9BCC31361F79700837C63 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DFD9BCC41361F79700837C63 /* HDE-Info.plist */,
+				DFD9BCC51361F79700837C63 /* InfoPlist.strings */,
+				DFD9BCC81361F79700837C63 /* HDE-Prefix.pch */,
+				DFD9BCC91361F79700837C63 /* main.m */,
+				DFD9BCCB1361F79700837C63 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DFD9BCB71361F79700837C63 /* HDE */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DFD9BCD61361F79700837C63 /* Build configuration list for PBXNativeTarget "HDE" */;
+			buildPhases = (
+				DFD9BCB41361F79700837C63 /* Sources */,
+				DFD9BCB51361F79700837C63 /* Frameworks */,
+				DFD9BCB61361F79700837C63 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HDE;
+			productName = HDE;
+			productReference = DFD9BCB81361F79700837C63 /* HDE.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DFD9BCAF1361F79700837C63 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = "Kasetsart University";
+			};
+			buildConfigurationList = DFD9BCB21361F79700837C63 /* Build configuration list for PBXProject "HDE" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = DFD9BCAD1361F79700837C63;
+			productRefGroup = DFD9BCB91361F79700837C63 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DFD9BCB71361F79700837C63 /* HDE */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DFD9BCB61361F79700837C63 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFD9BCC71361F79700837C63 /* InfoPlist.strings in Resources */,
+				DFD9BCCD1361F79700837C63 /* Credits.rtf in Resources */,
+				DFD9BCD31361F79700837C63 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DFD9BCB41361F79700837C63 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DFD9BCCA1361F79700837C63 /* main.m in Sources */,
+				DFD9BCD01361F79700837C63 /* HDEAppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		DFD9BCC51361F79700837C63 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DFD9BCC61361F79700837C63 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		DFD9BCCB1361F79700837C63 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DFD9BCCC1361F79700837C63 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		DFD9BCD11361F79700837C63 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DFD9BCD21361F79700837C63 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		DFD9BCD41361F79700837C63 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		DFD9BCD51361F79700837C63 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		DFD9BCD71361F79700837C63 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "HDE/HDE-Prefix.pch";
+				INFOPLIST_FILE = "HDE/HDE-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		DFD9BCD81361F79700837C63 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "HDE/HDE-Prefix.pch";
+				INFOPLIST_FILE = "HDE/HDE-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DFD9BCB21361F79700837C63 /* Build configuration list for PBXProject "HDE" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DFD9BCD41361F79700837C63 /* Debug */,
+				DFD9BCD51361F79700837C63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DFD9BCD61361F79700837C63 /* Build configuration list for PBXNativeTarget "HDE" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DFD9BCD71361F79700837C63 /* Debug */,
+				DFD9BCD81361F79700837C63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DFD9BCAF1361F79700837C63 /* Project object */;
+}
