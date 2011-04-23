@@ -10,7 +10,10 @@
 
 @implementation HDEAppDelegate
 
-@synthesize window, scratchFolder, output, matchID, urlToServerLog, currentValue, currentKey;
+@synthesize window, matchID;
+@synthesize allWebView, infoWebView, playerWebView, chatWebView, abilityWebView, damageWebView,purchaseWebView, unknownWebView, killWebView, heroKillWebView;
+@synthesize testOutWeb;
+@synthesize scratchFolder, urlToServerLog, currentValue, currentKey;
 
 -(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender{
     return YES;
@@ -31,11 +34,14 @@
     NSString * temporaryDirectory = [[NSFileManager defaultManager]
                                      stringWithFileSystemRepresentation: buffer
                                      length: strlen(buffer)];
+    
 	self.scratchFolder = temporaryDirectory;
 }
 
 -(void)ParserButton:(id)sender{
+    
     [sender setEnabled:NO];
+    
     NSURL *urlXML = [NSURL URLWithString:[@"http://xml.heroesofnewerth.com/xml_requester.php?f=match_stats&opt=mid&mid[]=" stringByAppendingString:[matchID stringValue]]];
     NSXMLParser *parser = [[[NSXMLParser alloc] initWithContentsOfURL:urlXML] autorelease];
     
@@ -56,43 +62,171 @@
 		NSData *data = [wrapper regularFileContents];
         NSString *serverLog = [[[NSString alloc] initWithData:data encoding:NSUTF16StringEncoding] autorelease];
         NSArray *lines = [serverLog componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-        NSMutableString *textOutput = [NSMutableString string];
+        
+        NSMutableString *allText = [NSMutableString string];
+        NSMutableString *infoText = [NSMutableString string];
+        NSMutableString *playerText = [NSMutableString string];
+        NSMutableString *chatText = [NSMutableString string];
+        NSMutableString *abilityText = [NSMutableString string];
+        NSMutableString *damageText = [NSMutableString string];
+        NSMutableString *purchaseText = [NSMutableString string];
+        NSMutableString *unknownText = [NSMutableString string];
+        NSMutableString *killText = [NSMutableString string];
+        NSMutableString *heroKillText = [NSMutableString string];
+        
+        
+        //Formatter
+        NSNumberFormatter * f = [[[NSNumberFormatter alloc] init] autorelease];
+        [f setNumberStyle:NSNumberFormatterDecimalStyle];
+        
         NSMutableDictionary *playerNames = [NSMutableDictionary dictionary];
         NSMutableDictionary *playerHeroes = [NSMutableDictionary dictionary];
+        
         for (NSString *line in lines) {
+            if ([line isEqualToString:@""]) continue;
             NSDictionary *keyValue = [self parseLog:[line stringByAppendingString:@" "]];
+            NSMutableString *temp = [NSMutableString string];
+            //INFO Section
             if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_DATE"]) {
-                [textOutput appendFormat:@"Game started on %@ at %@\n", [keyValue objectForKey:@"date"], [keyValue objectForKey:@"time"]];
+                [temp appendFormat:@"Game started on %@ at %@</br>", [keyValue objectForKey:@"date"], [keyValue objectForKey:@"time"]];
+                [allText appendString:temp];
+                [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_SERVER"]) {
-                [textOutput appendFormat:@"Hosted on %@\n", [keyValue objectForKey:@"name"]];
+                [temp appendFormat:@"Hosted on %@</br>", [keyValue objectForKey:@"name"]];
+                [allText appendString:temp];
+                [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_GAME"]) {
-                [textOutput appendFormat:@"Version %@\n", [keyValue objectForKey:@"version"]];
+                [temp appendFormat:@"Version %@</br>", [keyValue objectForKey:@"version"]];
+                [allText appendString:temp];
+                [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_MATCH"]) {
-                [textOutput appendFormat:@"Game name %@ ID %@\n", [keyValue objectForKey:@"name"], [keyValue objectForKey:@"id"]];
+                [temp appendFormat:@"Game name %@ ID %@</br>", [keyValue objectForKey:@"name"], [keyValue objectForKey:@"id"]];
+                [allText appendString:temp];
+                [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_MAP"]) {
-                [textOutput appendFormat:@"Map name %@ version %@\n", [keyValue objectForKey:@"name"], [keyValue objectForKey:@"version"]];
+                [temp appendFormat:@"Map name %@ version %@</br>", [keyValue objectForKey:@"name"], [keyValue objectForKey:@"version"]];
+                [allText appendString:temp];
+                [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_SETTINGS"]) {
-                [textOutput appendFormat:@"On mode %@ with options %@\n", [keyValue objectForKey:@"mode"], [keyValue objectForKey:@"options"]];
-            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CONNECT"] && ([keyValue objectForKey:@"time"] == nil)) {
-                [playerNames setValue:[keyValue objectForKey:@"name"] forKey:[keyValue objectForKey:@"player"]];
-                [textOutput appendFormat:@"Player %@ connected on slot %@\n", [keyValue objectForKey:@"name"], [keyValue objectForKey:@"player"]];
+                [temp appendFormat:@"On mode %@ with options %@</br>", [keyValue objectForKey:@"mode"], [keyValue objectForKey:@"options"]];
+                [allText appendString:temp];
+                [infoText appendString:temp];
+            }
+            //PLAYER Section
+            else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CONNECT"] && ([keyValue objectForKey:@"time"] == nil)) {
+                [self addAndSetPlayerColorFrom: keyValue toPlayers: playerNames f: f]; 
+                
+                [temp appendFormat:@"Player %@ connected on slot %@</br>", [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"player"]];
+                [allText appendString:temp];
+                [playerText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CONNECT"] && ([keyValue objectForKey:@"time"] != nil)) {
+                
+                [temp appendFormat:@"[%@]Player %@ reconnected</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]]];
+                [allText appendString:temp];
+                [playerText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_SELECT"]) {
                 [playerHeroes setValue:[keyValue objectForKey:@"hero"] forKey:[keyValue objectForKey:@"player"]];
-                [textOutput appendFormat:@"%@ selected %@\n",
-                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                
+                [temp appendFormat:@"%@ selected %@</br>",
+                [playerNames objectForKey:[keyValue objectForKey:@"player"]],
                  [keyValue objectForKey:@"hero"]];
-            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CHAT"]) {
-                NSString *heroname = [playerHeroes objectForKey:[keyValue objectForKey:@"player"]];
-                if (heroname == nil) heroname = [NSString stringWithString:@"No Hero"];
-                [textOutput appendFormat:@"[%@]%@(%@): %@\n",
-                 [keyValue objectForKey:@"target"],
-                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
-                 heroname,
-                 [keyValue objectForKey:@"msg"]];
-            } 
+                [allText appendString:temp];
+                [playerText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_RANDOM"]) {
+                [playerHeroes setValue:[keyValue objectForKey:@"hero"] forKey:[keyValue objectForKey:@"player"]];
+                
+                [temp appendFormat:@"%@ randomed %@</br>",
+                [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [keyValue objectForKey:@"hero"]];
+                [allText appendString:temp];
+                [playerText appendString:temp];
+            }
+            //CHAT Section
+            else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CHAT"]) {
+                NSString *heroName = [playerHeroes objectForKey:[keyValue objectForKey:@"player"]];
+                if (heroName == nil) heroName = [NSString stringWithString:@"No Hero"];
+                
+                if ([[keyValue objectForKey:@"target"] isEqualToString:@"team"]) {
+                    if ([[f numberFromString:[keyValue objectForKey:@"player"]] intValue] < 5) {
+                    [temp appendFormat:@"[<span style=\"color: green;\">Legion</span>]%@(%@): %@</br>",
+                     [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                     heroName,
+                     [keyValue objectForKey:@"msg"]]; 
+                    } else {
+                        [temp appendFormat:@"[<span style=\"color: rgb(255,0,0);\">Hellbourne</span>]%@(%@): %@</br>",
+                         [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                         heroName,
+                         [keyValue objectForKey:@"msg"]];
+                    }
+                } else {
+                    [temp appendFormat:@"[ALL]%@(%@): %@</br>",
+                     [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                     heroName,
+                     [keyValue objectForKey:@"msg"]];
+                }
+                
+                [allText appendString:temp];
+                [chatText appendString:temp];
+            }
+            //ABILITY Section
+            else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ABILITY_UPGRADE"]) {
+                [temp appendFormat:@"[%@]%@ learned %@ to level %@</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"name"], [keyValue objectForKey:@"level"]];
+                [allText appendString:temp];
+                [abilityText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ABILITY_ACTIVATE"]) {
+                [temp appendFormat:@"[%@]%@ used %@(%@)</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"name"], [keyValue objectForKey:@"level"]];
+                [allText appendString:temp];
+                [abilityText appendString:temp];
+            }
+            //DAMAGE Section
+            else if ([[keyValue objectForKey:@"title"] isEqualToString:@"DAMAGE"]) {
+                [temp appendFormat:@"%@ damaged %@ for %@</br>", [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"target"], [keyValue objectForKey:@"damage"]];
+                [allText appendString:temp];
+                [damageText appendString:temp];
+            }
+            //KILL Section
+            else if ([[keyValue objectForKey:@"title"] isEqualToString:@"KILL"]) {
+                NSString *killer =  [playerNames objectForKey:[keyValue objectForKey:@"player"]];
+                if (killer == nil) killer = [keyValue objectForKey:@"attacker"];
+                [temp appendFormat:@"[%@]%@ killed %@</br>", [self stringToDate:[keyValue objectForKey:@"time"]], killer, [keyValue objectForKey:@"target"]];
+                [allText appendString:temp];
+                
+                if (([keyValue objectForKey:@"player"] != nil) && ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"])) [heroKillText appendString:temp];
+                [killText appendString:temp];
+            }
+            //PURCHASE Section
+            else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ITEM_PURCHASE"]) {
+                [temp appendFormat:@"[%@]%@ bought %@ for %@</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"], [keyValue objectForKey:@"cost"]];
+                [allText appendString:temp];
+                [purchaseText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ITEM_SELL"]) {
+                [temp appendFormat:@"[%@]%@ sold %@ for %@</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"], [keyValue objectForKey:@"value"]];
+                [allText appendString:temp];
+                [purchaseText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ITEM_ACTIVATE"]) {
+                [temp appendFormat:@"[%@]%@ used %@ on %@</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"], [keyValue objectForKey:@"target"]];
+                [allText appendString:temp];
+                [purchaseText appendString:temp];
+            } else {
+                [unknownText appendString:line];
+                [unknownText appendString:@"</br>"];
+            }
         }
         
-        [output setString:textOutput];
+        NSURL *baseURL = [NSURL URLWithString:@"//"];
+        
+        [[self.testOutWeb mainFrame] loadHTMLString:@"<span style=\"color: rgb(0, 60, 233);\">test</span>" baseURL:baseURL];
+        
+        [[self.allWebView mainFrame] loadHTMLString:allText baseURL:baseURL];
+        [[self.infoWebView mainFrame] loadHTMLString:infoText baseURL:baseURL];
+        [[self.playerWebView mainFrame] loadHTMLString:playerText baseURL:baseURL];
+        [[self.chatWebView mainFrame] loadHTMLString:chatText baseURL:baseURL];
+        [[self.abilityWebView mainFrame] loadHTMLString:abilityText baseURL:baseURL];
+        [[self.damageWebView mainFrame] loadHTMLString:damageText baseURL:baseURL];
+        [[self.purchaseWebView mainFrame] loadHTMLString:purchaseText baseURL:baseURL];
+        [[self.unknownWebView mainFrame] loadHTMLString:unknownText baseURL:baseURL];
+        [[self.killWebView mainFrame] loadHTMLString:killText baseURL:baseURL];
+        [[self.heroKillWebView mainFrame] loadHTMLString:heroKillText baseURL:baseURL];
     }
     else
     {
@@ -100,7 +234,23 @@
     }
     
     urlToServerLog = nil;
+    
     [sender setEnabled:YES];
+    
+}
+
+-(NSString *)stringToDate:(NSString *)time{
+    //Formatter
+    NSNumberFormatter * f = [[[NSNumberFormatter alloc] init] autorelease];
+    [f setNumberStyle:NSNumberFormatterDecimalStyle];
+    
+    NSNumber *num = [f numberFromString:time];
+    
+    long long sec = [num longLongValue] / 1000;
+    long long min = sec / 60;
+    long long hour = min / 60;
+    
+    return [NSString stringWithFormat:@"%.2qi:%.2qi:%.2qi", hour, min % 60, sec % 60];
 }
 
 -(NSDictionary *)parseLog:(NSString *)log{
@@ -108,16 +258,16 @@
     bool isQuote = NO;
     NSMutableString *buffer = [NSMutableString string];
     NSString *key = nil;
-    NSString *value = nil;
+    NSString *value;
     NSMutableDictionary *keyValue = [NSMutableDictionary dictionary];
     for (NSUInteger i = 0; i < [log length]; i++) {
-        if ((!isQuote) && ([log characterAtIndex:i] == ' ')) {
+        if ((!isQuote) && (' ' == [log characterAtIndex:i])) {
             if (isTitle) {
                 [keyValue setValue:buffer forKey:@"title"];
                 buffer = [NSMutableString string];
                 isTitle = NO;
             } else {
-                value = [buffer copy];
+                value = [[buffer copy] autorelease];
                 buffer = [NSMutableString string];
                 [keyValue setValue:value forKey:key];
             }
@@ -133,7 +283,7 @@
         }
         
         if ((!isQuote) && ([log characterAtIndex:i] == ':')) {
-            key = [buffer copy];
+            key = [[buffer copy] autorelease];
             buffer = [NSMutableString string];
             continue;
         }
@@ -144,13 +294,43 @@
     return keyValue;
 }
 
--(NSString *)getValueFrom:(NSArray *)array at:(int)position{
-    if ([[array objectAtIndex:position] rangeOfString:@":"].location != NSNotFound)
-    {
-        NSString *value = [[array objectAtIndex:position] substringFromIndex:[[array objectAtIndex:position] rangeOfString:@":"].location + 1];
-        return [value stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\""]];
+- (void) addAndSetPlayerColorFrom: (NSDictionary *) keyValue toPlayers: (NSMutableDictionary *) playerNames f: (NSNumberFormatter *) f  {
+    //<span style=\"color: rgb(0, 60, 233);\">test</span>
+    switch ([[f numberFromString:[keyValue objectForKey:@"player"]] intValue]) {
+        case 0:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(0, 60, 233);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            break;
+        case 1:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(124, 255, 241);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            break;
+        case 2:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(97, 50, 148);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            break;
+        case 3:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(255, 252, 1);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            break;
+        case 4:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(254, 138, 14);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            break;
+        case 5:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(229, 91, 176);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            break;
+        case 6:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(149, 150, 151);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            break;
+        case 7:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(106, 171, 255);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            break;
+        case 8:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(16, 98, 70);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            break;
+        case 9:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(173, 92, 51);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            break;
+        default:
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(173, 92, 51);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
     }
-    return nil;
+    
 }
 
 -(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict{
@@ -164,7 +344,7 @@
 }
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName{
     if ([self.currentKey isEqualToString:@"url"])
-        self.urlToServerLog = [self.currentValue mutableCopy];
+        self.urlToServerLog = [[self.currentValue mutableCopy] autorelease];
 }
 
 -(NSFileWrapper*)unzip:(NSData*)zipData
