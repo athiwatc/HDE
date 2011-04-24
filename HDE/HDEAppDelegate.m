@@ -282,7 +282,7 @@
     long long min = sec / 60;
     long long hour = min / 60;
     
-    return [NSString stringWithFormat:@"%.2qi:%.2qi:%.2qi:%.4qi", hour, min % 60, sec % 60, milliSec % 1000];
+    return [NSString stringWithFormat:@"%.2qi:%.2qi:%.2qi:f%.2qi", hour, min % 60, sec % 60, (milliSec % 1000) / 50];
 }
 
 - (NSDictionary *)parseLog:(NSString *)log {
