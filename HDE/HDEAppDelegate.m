@@ -486,11 +486,12 @@
                 [allText appendString:temp];
                 [awardText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_RIVAL"]) {
-                [temp appendFormat:@"[%@]%@(%@) is completely owning %@</br>",
+                [temp appendFormat:@"[%@]%@(%@) is completely owning %@(%@)</br>",
                  [self stringToDateString:[keyValue objectForKey:@"time"]],
                  [playerNames objectForKey:[keyValue objectForKey:@"player"]],
                  [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
-                 [self getStringFromTable:[keyValue objectForKey:@"name"]]];
+                 [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]];
                 [allText appendString:temp];
                 [awardText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_FIRST_BLOOD"]) {
@@ -523,7 +524,6 @@
                  [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]];
                 [allText appendString:temp];
                 [awardText appendString:temp];
-                [goldText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_PAYBACK"]) {
                 [temp appendFormat:@"[%@]%@(%@) just got a payback from %@(%@)</br>",
                  [self stringToDateString:[keyValue objectForKey:@"time"]],
@@ -533,7 +533,6 @@
                  [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]];
                 [allText appendString:temp];
                 [awardText appendString:temp];
-                [goldText appendString:temp];
             }
             //GOLD Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"GOLD_EARNED"]) {
