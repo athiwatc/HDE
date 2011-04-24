@@ -69,16 +69,16 @@
         NSString *serverLog = [[[NSString alloc] initWithData:data encoding:NSUTF16StringEncoding] autorelease];
         NSArray *lines = [serverLog componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
         
-        NSMutableString *allText = [NSMutableString string];
-        NSMutableString *infoText = [NSMutableString string];
-        NSMutableString *playerText = [NSMutableString string];
-        NSMutableString *chatText = [NSMutableString string];
-        NSMutableString *abilityText = [NSMutableString string];
-        NSMutableString *damageText = [NSMutableString string];
-        NSMutableString *purchaseText = [NSMutableString string];
-        NSMutableString *unknownText = [NSMutableString string];
-        NSMutableString *killText = [NSMutableString string];
-        NSMutableString *heroKillText = [NSMutableString string];
+        NSMutableString *allText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *infoText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *playerText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *chatText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *abilityText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *damageText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *purchaseText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *unknownText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *killText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *heroKillText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
         
         
         //Formatter
