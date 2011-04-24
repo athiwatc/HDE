@@ -32,6 +32,7 @@
     NSString *currentPlayerName;
     NSMutableDictionary *realPlayerPosition;
     NSMutableDictionary *slotToPostion;
+    NSMutableDictionary *stringTable;
 }
 
 @property(assign) IBOutlet NSWindow *window;
@@ -55,6 +56,7 @@
 @property(nonatomic, retain) NSString *currentPlayerName;
 @property(nonatomic, retain) NSMutableDictionary *realPlayerPosition;
 @property(nonatomic, retain) NSMutableDictionary *slotToPostion;
+@property(nonatomic, retain) NSDictionary *stringTable;
 
 
 - (IBAction)ParserButton:(id)sender;
@@ -66,6 +68,10 @@
 - (NSString *)stringToDateString:(NSString *)time;
 
 - (NSString *)removeClanTag:(NSString *)playerName;
+
+-(NSDictionary*)processStringTableFromString: (NSString*)string;
+
+-(NSString*)getStringFromTable: (NSString*)string ;
 
 - (void)addAndSetPlayerColorFrom:(NSDictionary *)keyValue toPlayers:(NSMutableDictionary *)playerNames f:(NSNumberFormatter *)f;
 
