@@ -594,7 +594,7 @@
                  [playerNames objectForKey:[keyValue objectForKey:@"player"]],
                  [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
                  [keyValue objectForKey:@"count"],
-                 [playerNames objectForKey:[keyValue objectForKey:@"period"]]]; 
+                 [keyValue objectForKey:@"period"]]; 
                 
                 [apmText appendString:temp];
             }
