@@ -298,6 +298,15 @@
                 [allText appendString:temp];
                 [infoText appendString:temp];
                 [goldText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_TIMEDOUT"]) {
+                [temp appendFormat:@"[%@]%@(%@) timedout</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]]];
+                
+                [allText appendString:temp];
+                [infoText appendString:temp];
+                [goldText appendString:temp];
             }
             //CHAT Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CHAT"]) {
@@ -505,6 +514,25 @@
                  [keyValue objectForKey:@"count"]];
                 [allText appendString:temp];
                 [awardText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_SMACKDOWN"]) {
+                [temp appendFormat:@"[%@]%@(%@) got a smackdown %@(%@)</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]];
+                [allText appendString:temp];
+                [awardText appendString:temp];
+                [goldText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_PAYBACK"]) {
+                [temp appendFormat:@"[%@]%@(%@) just got a payback from %@(%@)</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]];
+                [allText appendString:temp];
+                [awardText appendString:temp];
                 [goldText appendString:temp];
             }
             //GOLD Section
@@ -597,6 +625,16 @@
                  [playerNames objectForKey:[keyValue objectForKey:@"player"]],
                  [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
                  [keyValue objectForKey:@"experience"],
+                 [keyValue objectForKey:@"gold"],
+                 [self getStringFromTable:[keyValue objectForKey:@"name"]]]; 
+                
+                [allText appendString:temp];
+                [expText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"BUILDING_DENY"]) {
+                [temp appendFormat:@"[%@]%@(%@) denied %@ gold from %@(total lost)</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
                  [keyValue objectForKey:@"gold"],
                  [self getStringFromTable:[keyValue objectForKey:@"name"]]]; 
                 
