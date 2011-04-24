@@ -292,7 +292,9 @@
                     [temp appendFormat:@"[%@]%@(%@) killed %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], killer, [playerHeroes objectForKey:[keyValue objectForKey:@"player"]], [self getStringFromTable:[keyValue objectForKey:@"target"]]];
                 }
                 [allText appendString:temp];
-                if (([keyValue objectForKey:@"player"] != nil) && ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"])) [heroText appendString:temp];
+                if (([keyValue objectForKey:@"player"] != nil) && ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"])){ [heroKillText appendString:temp];
+                    [heroText appendString:temp];
+                }
                 [killText appendString:temp];
             }
             //HERO Section
@@ -344,30 +346,45 @@
                 [allText appendString:temp];
                 [purchaseText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ITEM_DROP"]) {
-                [temp appendFormat:@"[%@]%@(%@) dropped %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [playerHeroes objectForKey:[keyValue objectForKey:@"player"]], [self getStringFromTable:[keyValue objectForKey:@"item"]]];
+                [temp appendFormat:@"[%@]%@(%@) dropped %@</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [self getStringFromTable:[keyValue objectForKey:@"item"]]];
                 [allText appendString:temp];
                 [purchaseText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ITEM_PICKUP"]) {
-                [temp appendFormat:@"[%@]%@(%@) picked %@ up</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [playerHeroes objectForKey:[keyValue objectForKey:@"player"]], [self getStringFromTable:[keyValue objectForKey:@"item"]]];
+                [temp appendFormat:@"[%@]%@(%@) picked %@ up</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [self getStringFromTable:[keyValue objectForKey:@"item"]]];
                 [allText appendString:temp];
                 [purchaseText appendString:temp];
             }
             //AWARD Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_MULTI_KILL"]) {
-                [temp appendFormat:@"[%@]%@(%@) is on a %@ multikill</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],[keyValue objectForKey:@"count"]];
-                [allText appendString:temp];
-                [awardText appendString:temp];
-            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_KILL_STREAK"]) {
-                [temp appendFormat:@"[%@]%@(%@) is on a %@ killstreak</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [playerHeroes objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"count"]];
-                [allText appendString:temp];
-                [awardText appendString:temp];
-            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_RIVAL"]) {
-                [temp appendFormat:@"[%@]%@(%@) is completely owning %@(%@)</br>",
+                [temp appendFormat:@"[%@]%@(%@) is on a %@ multikill</br>",
                  [self stringToDateString:[keyValue objectForKey:@"time"]],
                  [playerNames objectForKey:[keyValue objectForKey:@"player"]],
                  [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
-                 [self getStringFromTable:[keyValue objectForKey:@"name"]],
                  [keyValue objectForKey:@"count"]];
+                [allText appendString:temp];
+                [awardText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_KILL_STREAK"]) {
+                [temp appendFormat:@"[%@]%@(%@) is on a %@ killstreak</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [keyValue objectForKey:@"count"]];
+                [allText appendString:temp];
+                [awardText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_RIVAL"]) {
+                [temp appendFormat:@"[%@]%@(%@) is completely owning %@</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [self getStringFromTable:[keyValue objectForKey:@"name"]]];
                 [allText appendString:temp];
                 [awardText appendString:temp];
             }
