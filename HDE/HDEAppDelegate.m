@@ -307,6 +307,16 @@
                 [allText appendString:temp];
                 [infoText appendString:temp];
                 [goldText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_DISCONNECT"]) {
+                [temp appendFormat:@"[%@]%@(%@) disconnected because %@</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [keyValue objectForKey:@"reason"]];
+                
+                [allText appendString:temp];
+                [infoText appendString:temp];
+                [goldText appendString:temp];
             }
             //CHAT Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CHAT"]) {
