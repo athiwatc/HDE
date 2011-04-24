@@ -11,38 +11,40 @@
 @implementation HDEAppDelegate
 
 @synthesize window, matchID;
-@synthesize allWebView, infoWebView, playerWebView, chatWebView, abilityWebView, damageWebView,purchaseWebView, unknownWebView, killWebView, heroKillWebView;
-@synthesize testOutWeb;
-@synthesize scratchFolder, urlToServerLog, currentValue, currentKey;
+@synthesize allWebView, infoWebView, playerWebView, chatWebView, abilityWebView, damageWebView, purchaseWebView, unknownWebView, killWebView, heroKillWebView;
+@synthesize scratchFolder, urlToServerLog, currentValue, currentKey, currentPlayerName, realPlayerPosition, slotToPostion;
 
--(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender{
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
     return YES;
 }
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
-{
-    NSString * tempDir = NSTemporaryDirectory();
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    NSString *tempDir = NSTemporaryDirectory();
     if (tempDir == nil)
         tempDir = @"/tmp";
     
-    NSString * template = [tempDir stringByAppendingPathComponent: @"HDEtemp"];
-    const char * fsTemplate = [template fileSystemRepresentation];
-    NSMutableData * bufferData = [NSMutableData dataWithBytes: fsTemplate
-                                                       length: strlen(fsTemplate)+1];
-    char * buffer = [bufferData mutableBytes];
+    NSString *template = [tempDir stringByAppendingPathComponent:@"HDEtemp"];
+    const char *fsTemplate = [template fileSystemRepresentation];
+    NSMutableData *bufferData = [NSMutableData dataWithBytes:fsTemplate
+                                                      length:strlen(fsTemplate) + 1];
+    char *buffer = [bufferData mutableBytes];
     mkdtemp(buffer);
-    NSString * temporaryDirectory = [[NSFileManager defaultManager]
-                                     stringWithFileSystemRepresentation: buffer
-                                     length: strlen(buffer)];
+    NSString *temporaryDirectory = [[NSFileManager defaultManager]
+                                    stringWithFileSystemRepresentation:buffer
+                                    length:strlen(buffer)];
     
-	self.scratchFolder = temporaryDirectory;
+    self.scratchFolder = temporaryDirectory;
+    
+    self.realPlayerPosition = [NSMutableDictionary dictionary];
+    self.slotToPostion = [NSMutableDictionary dictionary];
 }
 
--(void)ParserButton:(id)sender{
+- (void)ParserButton:(id)sender {
     
-    [sender setEnabled:NO];
+    [(NSButton *)sender setEnabled:NO];
     
     NSURL *urlXML = [NSURL URLWithString:[@"http://xml.heroesofnewerth.com/xml_requester.php?f=match_stats&opt=mid&mid[]=" stringByAppendingString:[matchID stringValue]]];
+    
     NSXMLParser *parser = [[[NSXMLParser alloc] initWithContentsOfURL:urlXML] autorelease];
     
     [parser setDelegate:self];
@@ -50,16 +52,20 @@
     
     [self.urlToServerLog replaceOccurrencesOfString:@"honreplay" withString:@"zip" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [urlToServerLog length])];
     
+    if (self.urlToServerLog == nil) {
+        NSRunAlertPanel(@"MatchID doesn't exists", @"The MatchID that you provide doesn't exists", @"return", nil, nil);
+        [(NSButton *)sender setEnabled:YES];
+        return;
+    }
     NSURL *urlServerLog = [NSURL URLWithString:self.urlToServerLog];
     NSData *downloadData = [NSData dataWithContentsOfURL:urlServerLog];
     
     //NSData *downloadData = [NSData dataWithContentsOfFile:@"/Users/Athiwat/Desktop/M37139782.zip"];
     
-    NSFileWrapper* wrapper = [self unzip:downloadData];
-	
-	if( [wrapper isRegularFile] )
-	{
-		NSData *data = [wrapper regularFileContents];
+    NSFileWrapper *wrapper = [self unzip:downloadData];
+    
+    if ([wrapper isRegularFile]) {
+        NSData *data = [wrapper regularFileContents];
         NSString *serverLog = [[[NSString alloc] initWithData:data encoding:NSUTF16StringEncoding] autorelease];
         NSArray *lines = [serverLog componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
         
@@ -76,7 +82,7 @@
         
         
         //Formatter
-        NSNumberFormatter * f = [[[NSNumberFormatter alloc] init] autorelease];
+        NSNumberFormatter *f = [[[NSNumberFormatter alloc] init] autorelease];
         [f setNumberStyle:NSNumberFormatterDecimalStyle];
         
         NSMutableDictionary *playerNames = [NSMutableDictionary dictionary];
@@ -114,21 +120,21 @@
             }
             //PLAYER Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CONNECT"] && ([keyValue objectForKey:@"time"] == nil)) {
-                [self addAndSetPlayerColorFrom: keyValue toPlayers: playerNames f: f]; 
+                [self addAndSetPlayerColorFrom:keyValue toPlayers:playerNames f:f];
                 
                 [temp appendFormat:@"Player %@ connected on slot %@</br>", [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"player"]];
                 [allText appendString:temp];
                 [playerText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CONNECT"] && ([keyValue objectForKey:@"time"] != nil)) {
                 
-                [temp appendFormat:@"[%@]Player %@ reconnected</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]]];
+                [temp appendFormat:@"[%@]Player %@ reconnected</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]]];
                 [allText appendString:temp];
                 [playerText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_SELECT"]) {
                 [playerHeroes setValue:[keyValue objectForKey:@"hero"] forKey:[keyValue objectForKey:@"player"]];
                 
                 [temp appendFormat:@"%@ selected %@</br>",
-                [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
                  [keyValue objectForKey:@"hero"]];
                 [allText appendString:temp];
                 [playerText appendString:temp];
@@ -136,7 +142,24 @@
                 [playerHeroes setValue:[keyValue objectForKey:@"hero"] forKey:[keyValue objectForKey:@"player"]];
                 
                 [temp appendFormat:@"%@ randomed %@</br>",
-                [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [keyValue objectForKey:@"hero"]];
+                [allText appendString:temp];
+                [playerText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_SWAP"]) {
+                [playerHeroes setValue:[keyValue objectForKey:@"newhero"] forKey:[keyValue objectForKey:@"player"]];
+                
+                [temp appendFormat:@"%@ swapped %@ for %@</br>",
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [keyValue objectForKey:@"oldhero"],
+                 [keyValue objectForKey:@"newhero"]];
+                [allText appendString:temp];
+                [playerText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_REPICK"]) {
+                [playerHeroes setValue:[keyValue objectForKey:@"newhero"] forKey:[keyValue objectForKey:@"player"]];
+                
+                [temp appendFormat:@"%@ is now repicking %@ is now avaliable</br>",
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
                  [keyValue objectForKey:@"hero"]];
                 [allText appendString:temp];
                 [playerText appendString:temp];
@@ -147,11 +170,11 @@
                 if (heroName == nil) heroName = [NSString stringWithString:@"No Hero"];
                 
                 if ([[keyValue objectForKey:@"target"] isEqualToString:@"team"]) {
-                    if ([[f numberFromString:[keyValue objectForKey:@"player"]] intValue] < 5) {
-                    [temp appendFormat:@"[<span style=\"color: green;\">Legion</span>]%@(%@): %@</br>",
-                     [playerNames objectForKey:[keyValue objectForKey:@"player"]],
-                     heroName,
-                     [keyValue objectForKey:@"msg"]]; 
+                    if ([[f numberFromString:[self.slotToPostion objectForKey:[keyValue objectForKey:@"player"]]] longValue]< 5) {
+                        [temp appendFormat:@"[<span style=\"color: green;\">Legion</span>]%@(%@): %@</br>",
+                         [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                         heroName,
+                         [keyValue objectForKey:@"msg"]];
                     } else {
                         [temp appendFormat:@"[<span style=\"color: rgb(255,0,0);\">Hellbourne</span>]%@(%@): %@</br>",
                          [playerNames objectForKey:[keyValue objectForKey:@"player"]],
@@ -170,11 +193,11 @@
             }
             //ABILITY Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ABILITY_UPGRADE"]) {
-                [temp appendFormat:@"[%@]%@ learned %@ to level %@</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"name"], [keyValue objectForKey:@"level"]];
+                [temp appendFormat:@"[%@]%@ learned %@ to level %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"name"], [keyValue objectForKey:@"level"]];
                 [allText appendString:temp];
                 [abilityText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ABILITY_ACTIVATE"]) {
-                [temp appendFormat:@"[%@]%@ used %@(%@)</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"name"], [keyValue objectForKey:@"level"]];
+                [temp appendFormat:@"[%@]%@ used %@(%@)</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"name"], [keyValue objectForKey:@"level"]];
                 [allText appendString:temp];
                 [abilityText appendString:temp];
             }
@@ -186,9 +209,9 @@
             }
             //KILL Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"KILL"]) {
-                NSString *killer =  [playerNames objectForKey:[keyValue objectForKey:@"player"]];
+                NSString *killer = [playerNames objectForKey:[keyValue objectForKey:@"player"]];
                 if (killer == nil) killer = [keyValue objectForKey:@"attacker"];
-                [temp appendFormat:@"[%@]%@ killed %@</br>", [self stringToDate:[keyValue objectForKey:@"time"]], killer, [keyValue objectForKey:@"target"]];
+                [temp appendFormat:@"[%@]%@ killed %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], killer, [keyValue objectForKey:@"target"]];
                 [allText appendString:temp];
                 
                 if (([keyValue objectForKey:@"player"] != nil) && ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"])) [heroKillText appendString:temp];
@@ -196,26 +219,35 @@
             }
             //PURCHASE Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ITEM_PURCHASE"]) {
-                [temp appendFormat:@"[%@]%@ bought %@ for %@</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"], [keyValue objectForKey:@"cost"]];
+                [temp appendFormat:@"[%@]%@ bought %@ for %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"], [keyValue objectForKey:@"cost"]];
                 [allText appendString:temp];
                 [purchaseText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ITEM_SELL"]) {
-                [temp appendFormat:@"[%@]%@ sold %@ for %@</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"], [keyValue objectForKey:@"value"]];
+                [temp appendFormat:@"[%@]%@ sold %@ for %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"], [keyValue objectForKey:@"value"]];
                 [allText appendString:temp];
                 [purchaseText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ITEM_ACTIVATE"]) {
-                [temp appendFormat:@"[%@]%@ used %@ on %@</br>", [self stringToDate:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"], [keyValue objectForKey:@"target"]];
+                [temp appendFormat:@"[%@]%@ used %@ on %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"], [keyValue objectForKey:@"target"]];
+                [allText appendString:temp];
+                //Add to ABILITY
+                [abilityText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ITEM_TRANSFER"]) {
+                [temp appendFormat:@"[%@]%@ recieved %@ from %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"], [keyValue objectForKey:@"source"]];
                 [allText appendString:temp];
                 [purchaseText appendString:temp];
-            } else {
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"ITEM_ASSEMBLE"]) {
+                [temp appendFormat:@"[%@]%@ assembled %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"item"]];
+                [allText appendString:temp];
+                [purchaseText appendString:temp];
+            }
+            //UNKNOWN
+            else {
                 [unknownText appendString:line];
                 [unknownText appendString:@"</br>"];
             }
         }
         
         NSURL *baseURL = [NSURL URLWithString:@"//"];
-        
-        [[self.testOutWeb mainFrame] loadHTMLString:@"<span style=\"color: rgb(0, 60, 233);\">test</span>" baseURL:baseURL];
         
         [[self.allWebView mainFrame] loadHTMLString:allText baseURL:baseURL];
         [[self.infoWebView mainFrame] loadHTMLString:infoText baseURL:baseURL];
@@ -228,32 +260,32 @@
         [[self.killWebView mainFrame] loadHTMLString:killText baseURL:baseURL];
         [[self.heroKillWebView mainFrame] loadHTMLString:heroKillText baseURL:baseURL];
     }
-    else
-    {
+    else {
         NSLog(@"NOT HON");
     }
     
     urlToServerLog = nil;
     
-    [sender setEnabled:YES];
+    [(NSButton *)sender setEnabled:YES];
     
 }
 
--(NSString *)stringToDate:(NSString *)time{
+- (NSString *)stringToDateString:(NSString *)time {
     //Formatter
-    NSNumberFormatter * f = [[[NSNumberFormatter alloc] init] autorelease];
+    NSNumberFormatter *f = [[[NSNumberFormatter alloc] init] autorelease];
     [f setNumberStyle:NSNumberFormatterDecimalStyle];
     
     NSNumber *num = [f numberFromString:time];
     
-    long long sec = [num longLongValue] / 1000;
+    long long milliSec = [num longLongValue];
+    long long sec = milliSec / 1000;
     long long min = sec / 60;
     long long hour = min / 60;
     
-    return [NSString stringWithFormat:@"%.2qi:%.2qi:%.2qi", hour, min % 60, sec % 60];
+    return [NSString stringWithFormat:@"%.2qi:%.2qi:%.2qi:%.4qi", hour, min % 60, sec % 60, milliSec % 1000];
 }
 
--(NSDictionary *)parseLog:(NSString *)log{
+- (NSDictionary *)parseLog:(NSString *)log {
     bool isTitle = YES;
     bool isQuote = NO;
     NSMutableString *buffer = [NSMutableString string];
@@ -294,73 +326,95 @@
     return keyValue;
 }
 
-- (void) addAndSetPlayerColorFrom: (NSDictionary *) keyValue toPlayers: (NSMutableDictionary *) playerNames f: (NSNumberFormatter *) f  {
-    //<span style=\"color: rgb(0, 60, 233);\">test</span>
-    switch ([[f numberFromString:[keyValue objectForKey:@"player"]] intValue]) {
+- (NSString *)removeClanTag:(NSString *)playerName {
+    bool isClanTagOver = NO;
+    for (NSUInteger i = 0; i < [playerName length]; i++) {
+        if (isClanTagOver) {
+            return [playerName substringFromIndex:i];
+        } else if ([playerName characterAtIndex:i] == ']') {
+            isClanTagOver = YES;
+        }
+    }
+    
+    return playerName;
+}
+
+- (NSString *) getPositionByName: (NSDictionary *) keyValue  {
+    NSString* playerPosition = [self.realPlayerPosition objectForKey:[self removeClanTag:[keyValue objectForKey:@"name"]]];
+    return playerPosition;
+}
+- (void)addAndSetPlayerColorFrom:(NSDictionary *)keyValue toPlayers:(NSMutableDictionary *)playerNames f:(NSNumberFormatter *)f {
+    NSString *playerPosition;
+    playerPosition = [self getPositionByName: keyValue];
+    [slotToPostion setValue:playerPosition forKey:[keyValue objectForKey:@"player"]];
+    switch ([[f numberFromString:playerPosition] intValue]) {
         case 0:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(0, 60, 233);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(0, 60, 233);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
             break;
         case 1:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(124, 255, 241);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(124, 255, 241);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
             break;
         case 2:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(97, 50, 148);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(97, 50, 148);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
             break;
         case 3:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(255, 252, 1);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(255, 252, 1);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
             break;
         case 4:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(254, 138, 14);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(254, 138, 14);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
             break;
         case 5:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(229, 91, 176);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(229, 91, 176);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
             break;
         case 6:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(149, 150, 151);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(149, 150, 151);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
             break;
         case 7:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(106, 171, 255);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(106, 171, 255);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
             break;
         case 8:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(16, 98, 70);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(16, 98, 70);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
             break;
         case 9:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(173, 92, 51);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(173, 92, 51);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
             break;
         default:
-            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(173, 92, 51);\">%@</span>",[keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
+            [playerNames setValue:[NSString stringWithFormat:@"<span style=\"color: rgb(173, 92, 51);\">%@</span>", [keyValue objectForKey:@"name"]] forKey:[keyValue objectForKey:@"player"]];
     }
     
 }
 
--(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict{
+- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict {
     if ([elementName isEqualToString:@"stat"]) {
         self.currentKey = [attributeDict objectForKey:@"name"];
         self.currentValue = [[[NSMutableString alloc] init] autorelease];
-    }  
-}
--(void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string{
-    [self.currentValue appendFormat:string];
-}
--(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName{
-    if ([self.currentKey isEqualToString:@"url"])
-        self.urlToServerLog = [[self.currentValue mutableCopy] autorelease];
+    }
 }
 
--(NSFileWrapper*)unzip:(NSData*)zipData
-{
-    NSString* sourceFilename = @"zipped data";
-    NSString* targetFilename = @"unzipped folder";
+- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
+    [self.currentValue appendFormat:string];
+}
+
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
+    if ([self.currentKey isEqualToString:@"url"])
+        self.urlToServerLog = [[self.currentValue mutableCopy] autorelease];
+    else if ([self.currentKey isEqualToString:@"nickname"])
+        self.currentPlayerName = [[self.currentValue copy] autorelease];
+    else if ([self.currentKey isEqualToString:@"position"])
+        [self.realPlayerPosition setValue:[[self.currentValue copy] autorelease] forKey:self.currentPlayerName];
+}
+
+- (NSFileWrapper *)unzip:(NSData *)zipData {
+    NSString *sourceFilename = @"zipped data";
+    NSString *targetFilename = @"unzipped folder";
     
-    NSString* sourcePath = [self.scratchFolder stringByAppendingPathComponent: sourceFilename];
-    NSString* targetPath = [self.scratchFolder stringByAppendingPathComponent: targetFilename];
-    
+    NSString *sourcePath = [self.scratchFolder stringByAppendingPathComponent:sourceFilename];
+    NSString *targetPath = [self.scratchFolder stringByAppendingPathComponent:targetFilename];
     
     
     BOOL flag = [zipData writeToFile:sourcePath atomically:YES];
     
-    if( flag == NO )
-    {
+    if (flag == NO) {
         NSLog(@"error");
         return NULL;
     }
@@ -369,63 +423,49 @@
     //Unzip
     
     //-------------------
-    NSTask *cmnd=[[NSTask alloc] init];
-    [cmnd setLaunchPath:@"/usr/bin/ditto"];
-    [cmnd setArguments:[NSArray arrayWithObjects:
-                        @"-v",@"-x",@"-k",@"--rsrc",sourcePath,targetPath,nil]];
-    [cmnd launch];
-    [cmnd waitUntilExit];
+    NSTask *cmd = [[NSTask alloc] init];
+    [cmd setLaunchPath:@"/usr/bin/ditto"];
+    [cmd setArguments:[NSArray arrayWithObjects:
+                       @"-v", @"-x", @"-k", @"--rsrc", sourcePath, targetPath, nil]];
+    [cmd launch];
+    [cmd waitUntilExit];
     
-    // Handle the task's termination status
-    if ([cmnd terminationStatus] != 0)
-    {
+    if ([cmd terminationStatus] != 0) {
         NSLog(@"Sorry, didn't work.");
-        [cmnd release];
+        [cmd release];
         return NULL;
     }
+    [cmd release];
     
-    // You *did* remember to wash behind your ears ...
-    // ... right?
-    [cmnd release];
+    NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:targetPath error:nil];
     
+    NSFileWrapper *wrapper = nil;
     
-    
-    //unzip
-    //
-    
-    NSArray* contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:targetPath error:nil];
-    
-    
-    NSFileWrapper* wrapper = nil;
-    
-    if( [contents count] == 1 )
-    {
-        NSString* onepath;
-        onepath = [targetPath stringByAppendingPathComponent:[contents lastObject]];
+    if ([contents count] == 1) {
+        NSString *onePath;
+        onePath = [targetPath stringByAppendingPathComponent:[contents lastObject]];
         
-        NSData* data = [NSData dataWithContentsOfFile:onepath];
+        NSData *data = [NSData dataWithContentsOfFile:onePath];
         
-        wrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:data  ] autorelease];
+        wrapper = [[[NSFileWrapper alloc] initRegularFileWithContents:data] autorelease];
         
         
     }
-    else	if( [contents count] > 1 )
-    {
+    else if ([contents count] > 1) {
         
-        wrapper = [[[NSFileWrapper alloc] initDirectoryWithFileWrappers:NULL ] autorelease];
+        wrapper = [[[NSFileWrapper alloc] initDirectoryWithFileWrappers:NULL] autorelease];
         
         unsigned hoge;
-        for( hoge = 0; hoge < [contents count]; hoge++ )
-        {
-            NSString* onepath;
-            NSString* onefilename;
+        for (hoge = 0; hoge < [contents count]; hoge++) {
+            NSString *onePath;
+            NSString *oneFilename;
             
-            onefilename = [contents objectAtIndex:hoge];
-            onepath = [targetPath stringByAppendingPathComponent:onefilename];
+            oneFilename = [contents objectAtIndex:hoge];
+            onePath = [targetPath stringByAppendingPathComponent:oneFilename];
             
-            NSData* data = [NSData dataWithContentsOfFile:onepath];
+            NSData *data = [NSData dataWithContentsOfFile:onePath];
             
-            [wrapper addRegularFileWithContents:data   preferredFilename:onefilename ];
+            [wrapper addRegularFileWithContents:data preferredFilename:oneFilename];
         }
     }
     
@@ -435,8 +475,8 @@
     
     [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceDestroyOperation
                                                  source:self.scratchFolder
-                                            destination:@"" 
-                                                  files:[NSArray arrayWithObjects:sourceFilename, targetFilename,NULL]
+                                            destination:@""
+                                                  files:[NSArray arrayWithObjects:sourceFilename, targetFilename, NULL]
                                                     tag:NULL];
     
     
