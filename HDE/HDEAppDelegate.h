@@ -1,3 +1,19 @@
+/*
+ This file is part of HDE.
+ 
+ HDE is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ Foobar is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
 //
 //  HDEAppDelegate.h
 //  HDE
@@ -16,14 +32,18 @@
 
     WebView *allWebView;
     WebView *infoWebView;
-    WebView *playerWebView;
     WebView *chatWebView;
     WebView *abilityWebView;
     WebView *damageWebView;
     WebView *purchaseWebView;
     WebView *unknownWebView;
     WebView *killWebView;
+    WebView *heroWebView;
     WebView *heroKillWebView;
+    WebView *awardWebView;
+    WebView *expWebView;
+    WebView *goldWebView;
+    WebView *apmWebView;
 
     NSString *scratchFolder;
     NSMutableString *urlToServerLog;
@@ -40,14 +60,18 @@
 
 @property(assign) IBOutlet WebView *allWebView;
 @property(assign) IBOutlet WebView *infoWebView;
-@property(assign) IBOutlet WebView *playerWebView;
 @property(assign) IBOutlet WebView *chatWebView;
 @property(assign) IBOutlet WebView *abilityWebView;
 @property(assign) IBOutlet WebView *damageWebView;
 @property(assign) IBOutlet WebView *purchaseWebView;
 @property(assign) IBOutlet WebView *unknownWebView;
 @property(assign) IBOutlet WebView *killWebView;
+@property(assign) IBOutlet WebView *heroWebView;
 @property(assign) IBOutlet WebView *heroKillWebView;
+@property(assign) IBOutlet WebView *awardWebView;
+@property(assign) IBOutlet WebView *expWebView;
+@property(assign) IBOutlet WebView *goldWebView;
+@property(assign) IBOutlet WebView *apmWebView;
 
 @property(nonatomic, retain) NSString *scratchFolder;
 @property(nonatomic, retain) NSMutableString *urlToServerLog;
