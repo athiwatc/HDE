@@ -11,7 +11,7 @@
 @implementation HDEAppDelegate
 
 @synthesize window, matchID;
-@synthesize allWebView, infoWebView, chatWebView, abilityWebView, damageWebView, purchaseWebView, unknownWebView, killWebView, heroWebView, awardWebView, heroKillWebView;
+@synthesize allWebView, infoWebView, chatWebView, abilityWebView, damageWebView, purchaseWebView, unknownWebView, killWebView, heroWebView, awardWebView, heroKillWebView, goldWebView, expWebView, apmWebView;
 @synthesize scratchFolder, urlToServerLog, currentValue, currentKey, currentPlayerName, realPlayerPosition, slotToPostion, stringTable;
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
@@ -84,7 +84,7 @@
                 buffer = [NSMutableString string];
             }
             else if (isKey) {
-               	 [buffer appendFormat:@"%C",[line characterAtIndex:i]];
+                [buffer appendFormat:@"%C",[line characterAtIndex:i]];
             }
         }
         if (key != nil) [table setValue:buffer forKey:key];  
@@ -134,6 +134,9 @@
         NSMutableString *heroText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
         NSMutableString *heroKillText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
         NSMutableString *awardText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *goldText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *expText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *apmText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">This is not shown in the All Tab</br>"];
         
         
         //Formatter
@@ -150,29 +153,57 @@
             //INFO Section
             if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_DATE"]) {
                 [temp appendFormat:@"Game started on %@ at %@</br>", [keyValue objectForKey:@"date"], [keyValue objectForKey:@"time"]];
+                
                 [allText appendString:temp];
                 [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_SERVER"]) {
                 [temp appendFormat:@"Hosted on %@</br>", [keyValue objectForKey:@"name"]];
+                
                 [allText appendString:temp];
                 [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_GAME"]) {
                 [temp appendFormat:@"Version %@</br>", [keyValue objectForKey:@"version"]];
+                
                 [allText appendString:temp];
                 [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_MATCH"]) {
                 [temp appendFormat:@"Game name %@ ID %@</br>", [keyValue objectForKey:@"name"], [keyValue objectForKey:@"id"]];
+                
                 [allText appendString:temp];
                 [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_MAP"]) {
                 [temp appendFormat:@"Map name %@ version %@</br>", [keyValue objectForKey:@"name"], [keyValue objectForKey:@"version"]];
+                
                 [allText appendString:temp];
                 [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"INFO_SETTINGS"]) {
                 [temp appendFormat:@"On mode %@ with options %@</br>", [keyValue objectForKey:@"mode"], [keyValue objectForKey:@"options"]];
+                
                 [allText appendString:temp];
                 [infoText appendString:temp];
-            }
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"GAME_CONCEDE"]) {
+                NSString *winner;
+                if ([[keyValue objectForKey:@"team"] isEqualToString:@"1"]) winner = [NSString stringWithString:@"<span style=\"color: green;\">Legion</span>]</br>"];
+                else winner = [NSString stringWithString:@"[<span style=\"color: rgb(255,0,0);\">Hellbourne</span></br>"];
+                [temp appendFormat:@"[%@]%@ Wins</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 winner];
+                
+                [allText appendString:temp];
+                [infoText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"GAME_START"]) {
+                [temp appendString:@"Game started</br>"];
+                
+                [allText appendString:temp];
+                [infoText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_TEAM_CHANGE"]) {
+                [temp appendFormat:@"Change player %@ to team %@</br>",
+                 [keyValue objectForKey:@"player"],
+                 [keyValue objectForKey:@"team"]];
+                
+                [allText appendString:temp];
+                [infoText appendString:temp];
+            } 
             //INFO PLAYER Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CONNECT"] && ([keyValue objectForKey:@"time"] == nil)) {
                 [self addAndSetPlayerColorFrom:keyValue toPlayers:playerNames f:f];
@@ -204,7 +235,7 @@
                 
                 [temp appendFormat:@"%@ randomed %@</br>",
                  [playerNames objectForKey:[keyValue objectForKey:@"player"]],
-                 [keyValue objectForKey:@"hero"]];
+                 [self getStringFromTable:[keyValue objectForKey:@"hero"]]];
                 [allText appendString:temp];
                 [infoText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_SWAP"]) {
@@ -232,6 +263,25 @@
                  [keyValue objectForKey:@"type"]];
                 [allText appendString:temp];
                 [infoText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_VOTE"]) {
+                [temp appendFormat:@"[%@]%@(%@) voted %@ for %@</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [keyValue objectForKey:@"vote"],
+                 [keyValue objectForKey:@"type"]];
+                [allText appendString:temp];
+                [infoText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_BUYBACK"]) {
+                [temp appendFormat:@"[%@]%@(%@) buyback for %@</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [keyValue objectForKey:@"cost"]];
+                
+                [allText appendString:temp];
+                [infoText appendString:temp];
+                [goldText appendString:temp];
             }
             //CHAT Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CHAT"]) {
@@ -286,10 +336,31 @@
             //KILL Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"KILL"]) {
                 NSString *killer = [playerNames objectForKey:[keyValue objectForKey:@"player"]];
-                if (killer == nil) {
-                    [temp appendFormat:@"[%@]%@ killed %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [self getStringFromTable:[keyValue objectForKey:@"attacker"]], [self getStringFromTable:[keyValue objectForKey:@"target"]]];  
-                } else {
-                    [temp appendFormat:@"[%@]%@(%@) killed %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], killer, [playerHeroes objectForKey:[keyValue objectForKey:@"player"]], [self getStringFromTable:[keyValue objectForKey:@"target"]]];
+                NSString *owner = [playerNames objectForKey:[keyValue objectForKey:@"owner"]];
+                if (killer == nil && owner == nil) {
+                    [temp appendFormat:@"[%@]%@ killed %@</br>",
+                     [self stringToDateString:[keyValue objectForKey:@"time"]],
+                     [self getStringFromTable:[keyValue objectForKey:@"attacker"]],
+                     [self getStringFromTable:[keyValue objectForKey:@"target"]]];  
+                } else if (killer != nil && owner == nil) {
+                    [temp appendFormat:@"[%@]%@(%@) killed %@</br>",
+                     [self stringToDateString:[keyValue objectForKey:@"time"]],
+                     killer,
+                     [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                     [self getStringFromTable:[keyValue objectForKey:@"target"]]];
+                } else if (killer != nil && owner != nil) {
+                    [temp appendFormat:@"[%@]%@(%@) killed %@(%@)</br>",
+                     [self stringToDateString:[keyValue objectForKey:@"time"]],
+                     killer,
+                     [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                     owner,
+                     [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]];
+                } else if (killer == nil && owner != nil) {
+                    [temp appendFormat:@"[%@]%@ killed %@(%@)</br>",
+                     [self stringToDateString:[keyValue objectForKey:@"time"]],
+                     [self getStringFromTable:[keyValue objectForKey:@"attacker"]],
+                     owner,
+                     [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]];
                 }
                 [allText appendString:temp];
                 if (([keyValue objectForKey:@"player"] != nil) && ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"])){ [heroKillText appendString:temp];
@@ -302,25 +373,35 @@
                 [temp appendFormat:@"[%@]%@(%@) respawned after %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [playerHeroes objectForKey:[keyValue objectForKey:@"player"]], [self stringToDateString:[keyValue objectForKey:@"duration"]]];
                 
                 [allText appendString:temp];
-                if (([keyValue objectForKey:@"player"] != nil) && ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"])) [heroText appendString:temp];
                 [heroText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"HERO_DEATH"]) {
                 [temp appendFormat:@"[%@]%@(%@) died from %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [playerHeroes objectForKey:[keyValue objectForKey:@"player"]], [self getStringFromTable:[keyValue objectForKey:@"attacker"]]];
                 
                 [allText appendString:temp];
-                if (([keyValue objectForKey:@"player"] != nil) && ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"])) [heroText appendString:temp];
                 [heroText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"HERO_LEVEL"]) {
                 [temp appendFormat:@"[%@]%@(%@) level up to %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [playerHeroes objectForKey:[keyValue objectForKey:@"player"]], [keyValue objectForKey:@"level"]];
                 
                 [allText appendString:temp];
-                if (([keyValue objectForKey:@"player"] != nil) && ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"])) [heroText appendString:temp];
                 [heroText appendString:temp];
             } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"HERO_POWERUP"]) {
-                [temp appendFormat:@"[%@]%@(%@) used the rune %@</br>", [self stringToDateString:[keyValue objectForKey:@"time"]], [playerNames objectForKey:[keyValue objectForKey:@"player"]], [playerHeroes objectForKey:[keyValue objectForKey:@"player"]], [self getStringFromTable:[keyValue objectForKey:@"type"]]];
+                [temp appendFormat:@"[%@]%@(%@) used the rune %@</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [self getStringFromTable:[keyValue objectForKey:@"type"]]];
                 
                 [allText appendString:temp];
-                if (([keyValue objectForKey:@"player"] != nil) && ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"])) [heroText appendString:temp];
+                [heroText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"HERO_ASSIST"]) {
+                [temp appendFormat:@"[%@]%@(%@) got an assist from killing %@(%@)</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]];
+                
+                [allText appendString:temp];
                 [heroText appendString:temp];
             }
             //PURCHASE Section
@@ -387,6 +468,135 @@
                  [self getStringFromTable:[keyValue objectForKey:@"name"]]];
                 [allText appendString:temp];
                 [awardText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_FIRST_BLOOD"]) {
+                [temp appendFormat:@"[%@]%@(%@) just got first blood on %@(%@) for %@ gold</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]],
+                 [keyValue objectForKey:@"gold"]];
+                [allText appendString:temp];
+                [awardText appendString:temp];
+                [goldText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"AWARD_KILL_STREAK_BREAK"]) {
+                [temp appendFormat:@"[%@]%@(%@) broke %@(%@) steak which last %@ steak</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]],
+                 [keyValue objectForKey:@"count"]];
+                [allText appendString:temp];
+                [awardText appendString:temp];
+                [goldText appendString:temp];
+            }
+            //GOLD Section
+            else if ([[keyValue objectForKey:@"title"] isEqualToString:@"GOLD_EARNED"]) {
+                NSString *owner = [keyValue objectForKey:@"owner"];
+                if ([keyValue objectForKey:@"source"] != nil) {
+                    if (owner == nil){
+                        [temp appendFormat:@"[%@]%@(%@) earned %@ gold from %@</br>",
+                         [self stringToDateString:[keyValue objectForKey:@"time"]],
+                         [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                         [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                         [keyValue objectForKey:@"gold"],
+                         [self getStringFromTable:[keyValue objectForKey:@"source"]]];
+                    } else {
+                        [temp appendFormat:@"[%@]%@(%@) earned %@ gold from %@(%@)</br>",
+                         [self stringToDateString:[keyValue objectForKey:@"time"]],
+                         [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                         [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                         [keyValue objectForKey:@"gold"],
+                         [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                         [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]]; 
+                    }
+                }
+                
+                [allText appendString:temp];
+                [goldText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"GOLD_LOST"]) {
+                NSString *owner = [keyValue objectForKey:@"owner"];
+                if ([keyValue objectForKey:@"source"] != nil) {
+                    if (owner == nil){
+                        [temp appendFormat:@"[%@]%@(%@) lost %@ gold because %@</br>",
+                         [self stringToDateString:[keyValue objectForKey:@"time"]],
+                         [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                         [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                         [keyValue objectForKey:@"gold"],
+                         [self getStringFromTable:[keyValue objectForKey:@"source"]]];
+                    } else {
+                        [temp appendFormat:@"[%@]%@(%@) lost %@ gold because %@(%@)</br>",
+                         [self stringToDateString:[keyValue objectForKey:@"time"]],
+                         [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                         [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                         [keyValue objectForKey:@"gold"],
+                         [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                         [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]]; 
+                    }
+                }
+                
+                [allText appendString:temp];
+                [goldText appendString:temp];
+            }
+            //EXP Section
+            else if ([[keyValue objectForKey:@"title"] isEqualToString:@"EXP_EARNED"]) {
+                NSString *owner = [keyValue objectForKey:@"owner"];
+                if ([keyValue objectForKey:@"source"] != nil) {
+                    if (owner == nil){
+                        [temp appendFormat:@"[%@]%@(%@) gained %@ experience from %@</br>",
+                         [self stringToDateString:[keyValue objectForKey:@"time"]],
+                         [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                         [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                         [keyValue objectForKey:@"experience"],
+                         [self getStringFromTable:[keyValue objectForKey:@"source"]]];
+                    } else {
+                        [temp appendFormat:@"[%@]%@(%@) gained %@ experience from %@(%@)</br>",
+                         [self stringToDateString:[keyValue objectForKey:@"time"]],
+                         [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                         [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                         [keyValue objectForKey:@"experience"],
+                         [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                         [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]]; 
+                    }
+                }
+                
+                [allText appendString:temp];
+                [expText appendString:temp];
+            }
+            else if ([[keyValue objectForKey:@"title"] isEqualToString:@"EXP_DENIED"]) {
+                [temp appendFormat:@"[%@]%@(%@) denied %@ experience from %@(%@)</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]],
+                 [keyValue objectForKey:@"experience"],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]]]; 
+                
+                [allText appendString:temp];
+                [expText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"CREEP_DENY"]) {
+                [temp appendFormat:@"[%@]%@(%@) denied %@ experience and %@ gold from %@(total lost)</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [keyValue objectForKey:@"experience"],
+                 [keyValue objectForKey:@"gold"],
+                 [self getStringFromTable:[keyValue objectForKey:@"name"]]]; 
+                
+                [allText appendString:temp];
+                [expText appendString:temp];
+            }
+            //APM Section
+            else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_ACTIONS"]) {
+                [temp appendFormat:@"[%@]%@(%@) got %@ apm counted for a period of %@ millisecond(s)</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [keyValue objectForKey:@"count"],
+                 [playerNames objectForKey:[keyValue objectForKey:@"period"]]]; 
+                
+                [apmText appendString:temp];
             }
             //UNKNOWN
             else {
@@ -408,6 +618,9 @@
         [[self.heroWebView mainFrame] loadHTMLString:heroText baseURL:baseURL];
         [[self.heroKillWebView mainFrame] loadHTMLString:heroKillText baseURL:baseURL];
         [[self.awardWebView mainFrame] loadHTMLString:awardText baseURL:baseURL];
+        [[self.goldWebView mainFrame] loadHTMLString:goldText baseURL:baseURL];
+        [[self.expWebView mainFrame] loadHTMLString:expText baseURL:baseURL];
+        [[self.apmWebView mainFrame] loadHTMLString:apmText baseURL:baseURL];
     }
     else {
         NSLog(@"NOT HON");
