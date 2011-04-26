@@ -140,10 +140,9 @@
         
         NSMutableString *allText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
         NSMutableString *infoText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
-        NSMutableString *playerText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
         NSMutableString *chatText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
         NSMutableString *abilityText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
-        NSMutableString *damageText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
+        NSMutableString *damageText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\"><h2>The time here is the time of the kill, not the time of the damage</h2>"];
         NSMutableString *purchaseText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
         NSMutableString *unknownText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
         NSMutableString *killText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
@@ -152,7 +151,7 @@
         NSMutableString *awardText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
         NSMutableString *goldText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
         NSMutableString *expText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">"];
-        NSMutableString *apmText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\">This is not shown in the All Tab</br>"];
+        NSMutableString *apmText = [NSMutableString stringWithString:@"<body bgcolor=\"black\" text=\"white\"><h2>This is not shown in the All Tab</h2>"];
         
         
         //Formatter
@@ -162,6 +161,7 @@
         NSMutableDictionary *playerNames = [NSMutableDictionary dictionary];
         NSMutableDictionary *playerHeroes = [NSMutableDictionary dictionary];
         
+        NSString *killTime;
         for (NSString *line in lines) {
             if ([line isEqualToString:@""]) continue;
             NSDictionary *keyValue = [self parseLog:[line stringByAppendingString:@" "]];
@@ -323,6 +323,14 @@
                 
                 [allText appendString:temp];
                 [infoText appendString:temp];
+            } else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_KICKED"]) {
+                [temp appendFormat:@"[%@]%@(%@) got kicked</br>",
+                 [self stringToDateString:[keyValue objectForKey:@"time"]],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]]];
+                
+                [allText appendString:temp];
+                [infoText appendString:temp];
             }
             //CHAT Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"PLAYER_CHAT"]) {
@@ -392,7 +400,24 @@
             }
             //DAMAGE Section
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"DAMAGE"]) {
-                [temp appendFormat:@"%@(%@) damaged %@ for %@</br>", [playerNames objectForKey:[keyValue objectForKey:@"player"]], [playerHeroes objectForKey:[keyValue objectForKey:@"player"]], [self getStringFromTable:[keyValue objectForKey:@"target"]], [keyValue objectForKey:@"damage"]];
+                NSString *owner = [keyValue objectForKey:@"owner"];
+                if (owner == nil) {
+                [temp appendFormat:@"[%@]%@(%@) damaged %@ for %@</br>",
+                 [self stringToDateString:killTime],
+                 [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                 [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                 [self getStringFromTable:[keyValue objectForKey:@"target"]],
+                 [keyValue objectForKey:@"damage"]];
+                } else {
+                    [temp appendFormat:@"[%@]%@(%@) damaged %@(%@) for %@</br>",
+                     [self stringToDateString:killTime],
+                     [playerNames objectForKey:[keyValue objectForKey:@"player"]],
+                     [playerHeroes objectForKey:[keyValue objectForKey:@"player"]],
+                     [playerNames objectForKey:[keyValue objectForKey:@"owner"]],
+                     [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]],
+                     [keyValue objectForKey:@"damage"]];
+                }
+                
                 [allText appendString:temp];
                 [damageText appendString:temp];
             }
@@ -400,6 +425,7 @@
             else if ([[keyValue objectForKey:@"title"] isEqualToString:@"KILL"]) {
                 NSString *killer = [playerNames objectForKey:[keyValue objectForKey:@"player"]];
                 NSString *owner = [playerNames objectForKey:[keyValue objectForKey:@"owner"]];
+                killTime = [keyValue objectForKey:@"time"];
                 if (killer == nil && owner == nil) {
                     [temp appendFormat:@"[%@]%@ killed %@</br>",
                      [self stringToDateString:[keyValue objectForKey:@"time"]],
@@ -426,7 +452,7 @@
                      [playerHeroes objectForKey:[keyValue objectForKey:@"owner"]]];
                 }
                 [allText appendString:temp];
-                if (([keyValue objectForKey:@"player"] != nil) && ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"])){ [heroKillText appendString:temp];
+                if ([[keyValue objectForKey:@"target"] hasPrefix:@"Hero"]){ [heroKillText appendString:temp];
                     [heroText appendString:temp];
                 }
                 [killText appendString:temp];
